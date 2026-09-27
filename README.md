@@ -1,13 +1,15 @@
 # Python Vision Detector
 
-Samostatné aplikace `frontend`, `backend` a `edge`. Docker Compose je zde
-připravený pro **lokální vývoj**, včetně automatického načítání změn kódu.
+Samostatné aplikace `frontend`, `backend` a `edge`. Docker Compose spouští
+frontend a backend pro **lokální vývoj**, včetně automatického načítání změn
+kódu. EDGE běží nativně ve vlastním Python prostředí.
 
 ## Předpoklady
 
 Na Windows nainstaluj a spusť [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
 s WSL 2 a Linux kontejnery. Ověř `docker version` a `docker compose version`.
-Lokální Python virtualenv ani Node.js nejsou pro běh v Dockeru potřeba.
+Pro frontend a backend v Dockeru nepotřebuješ lokální Python virtualenv ani
+Node.js. EDGE potřebuje lokální Python a vlastní virtuální prostředí.
 
 ## Frontend a backend
 
@@ -46,34 +48,35 @@ Konfigurace proxy sama do UI žádné volání API nepřidává.
 
 ## Edge
 
-Edge zatím nemá spustitelnou vision aplikaci. Má vlastní Dockerfile a volitelnou
-službu v profilu `edge`, takže se při běžném `up` nesestavuje ani nespouští.
-Interaktivní Python nebo shell spustíš takto:
+EDGE běží přímo na operačním systému kvůli přístupu ke kamerám, síťovým
+adaptérům a systémovým službám. Cílový systém je Linux / Debian / Raspberry Pi
+OS, později se spouštěním přes systemd. Zatím nemá spustitelnou vision aplikaci.
+
+Pro vývoj ve Windows připravíš prostředí z kořene projektu takto
+(pokud `edge/.venv` už existuje, první příkaz vynech):
 
 ```powershell
-docker compose run --build --rm edge
-docker compose run --build --rm edge sh
+py -3.12 -m venv edge/.venv
+.\edge\.venv\Scripts\python.exe -m pip install -r edge/requirements.txt
 ```
 
-Až vznikne například `edge/demo/main.py`, spustíš ho:
+Na Linuxu použij samostatné prostředí vytvořené na daném zařízení:
 
-```powershell
-docker compose run --build --rm edge python demo/main.py
+```bash
+python3 -m venv edge/.venv
+edge/.venv/bin/python -m pip install -r edge/requirements.txt
 ```
 
-Celá složka `edge` je připojená do `/app`. Testovací video tedy může ležet
-v `edge/recordings` a výsledky zapsané do `/app/output` zůstanou v `edge/output`
-i po odstranění kontejneru. Tyto složky se neukládají do Gitu ani Docker image.
-Volume `edge_models` je připravený pro případnou cache modelů DeepFace.
+Testovací videa patří do `edge/recordings`, reference do `edge/targets`,
+výsledky do `edge/output` a lokální stav do `edge/storage`. Jejich obsah je
+ignorovaný Gitem s výjimkou `.gitkeep`.
 
 Současný `edge/requirements.txt` neobsahuje DeepFace ani TensorFlow.
-Docker používá existující seznam závislostí; funkční rozpoznávání tváří tím
-zatím není zajištěné. První sestavení zároveň ověří dostupnost a kompatibilitu
-připnutých verzí pro Linux.
+Funkční rozpoznávání tváří ani kompatibilita všech připnutých závislostí
+na cílovém zařízení zatím nejsou ověřené.
 
-Tato konfigurace počítá s CPU a soubory videa. USB kamera, GPU a grafická okna
-OpenCV vyžadují další nastavení zařízení/zobrazení. PostgreSQL zatím není
-přidaný, protože backend dosud databázi nepoužívá.
+PostgreSQL zatím není v Compose přidaný, protože backend dosud databázi
+nepoužívá.
 
 ## Ověření a omezení
 
@@ -83,7 +86,6 @@ docker compose up --build -d
 docker compose ps
 Invoke-RestMethod http://localhost:8000/health
 Invoke-RestMethod http://localhost:5173/api/health
-docker compose run --build --rm edge python -c "import cv2; print(cv2.__version__)"
 ```
 
 Oba health požadavky mají vrátit `status: ok`. Pokud sestavení selže na
@@ -95,5 +97,4 @@ a běh kontejnerů zatím nebyly ověřené. Frontend běží přes vývojový V
 a backend přes reload režim; před veřejným nasazením bude potřeba produkční
 konfigurace.
 
-Použitá dokumentace: [Compose profily](https://docs.docker.com/compose/how-tos/profiles/)
-a [Vite server, proxy a polling](https://vite.dev/config/server-options).
+Použitá dokumentace: [Vite server, proxy a polling](https://vite.dev/config/server-options).

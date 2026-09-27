@@ -51,19 +51,14 @@ Preferována je jednoduchost a postupný vývoj.
   přesun na kratší cestu je možnost, nikoli dokončená změna.
 
 ## Aktuální Docker konfigurace
-- Existují compose.yaml a Dockerfile/.dockerignore pro všechny tři aplikace.
+- Existují compose.yaml a Dockerfile/.dockerignore pro backend a frontend.
 - Běžný Compose start spouští backend a frontend.
 - Backend: port localhost:8000, reload, připojený backend/app a healthcheck.
 - Frontend: port localhost:5173, Vite dev server a připojené zdrojové soubory.
 - PostgreSQL v Compose zatím není.
-- EDGE zůstává jako volitelná služba s profiles: ["edge"].
-- EDGE má připojenou složku edge do /app a volume edge_models.
-- Tyto EDGE Docker soubory jsou pozůstatek dřívějšího rozhodnutí,
-  nikoli požadavek cílové architektury.
-- Jejich odstranění dosud nebylo schváleno. Nemazat je automaticky.
-- Po schválení lze odstranit edge/Dockerfile, edge/.dockerignore,
-  službu edge, deklaraci edge_models a příslušné části README.
-- README stále popisuje Docker běh EDGE a neodpovídá novému rozhodnutí.
+- Docker podpora EDGE byla na výslovné zadání odstraněna: Dockerfile,
+  .dockerignore, služba v Compose i deklarace jejího volume.
+- README popisuje nativní Python prostředí EDGE na Windows a Linuxu.
 - Současná konfigurace je vývojová, nikoli produkční.
 
 ## Dosavadní ověření

@@ -51,3 +51,13 @@
   síť, proměnné prostředí a rozdíl mezi image a kontejnerem.
 - Nepřidávej Redis, message broker, Kubernetes, Traefik ani monitoring,
   pokud je nevyžaduje konkrétní zadání.
+## Volitelné budoucí funkce
+- Pokud bude dokončené MVP a zbyde čas, systém může obsahovat analýzu
+  společných výskytů osob.
+- Lze počítat počet společných výskytů, společný čas, poslední společný
+  výskyt, různé kamery/lokace a vlastní co-occurrence score.
+- Lze vytvořit graf vazeb mezi profily založený na těchto měřených datech.
+- Taková metrika označuje pouze pozorovanou četnost společného výskytu;
+  sama o sobě nesmí být prezentována jako důkaz přátelství, rodinného,
+  partnerského, pracovního nebo jiného skutečného vztahu.
+- Tato funkce je P2/bonus a nesmí blokovat dokončení základního systému.
