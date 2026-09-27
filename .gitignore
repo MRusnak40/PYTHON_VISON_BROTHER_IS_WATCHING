@@ -1,0 +1,61 @@
+# Python environments, bytecode and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+build/
+
+# Environment and secrets (only sanitized example templates may be committed)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Frontend dependencies, build output and Vite cache
+node_modules/
+dist/
+.vite/
+
+# IDE / operating system noise
+# Do not blanket-ignore .vscode: shared project configuration may be added.
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local biometric data and generated results; preserve directory placeholders
+/edge/recordings/*
+!/edge/recordings/.gitkeep
+/edge/targets/*
+!/edge/targets/.gitkeep
+/edge/demo/*
+!/edge/demo/.gitkeep
+/edge/output/*
+!/edge/output/.gitkeep
+/edge/storage/*
+!/edge/storage/.gitkeep
+
+# Biometric media anywhere under edge (also match uppercase extensions)
+/edge/**/*.[mM][pP]4
+/edge/**/*.[aA][vV][iI]
+/edge/**/*.[mM][oO][vV]
+/edge/**/*.[mM][kK][vV]
+/edge/**/*.[jJ][pP][gG]
+/edge/**/*.[jJ][pP][eE][gG]
+/edge/**/*.[pP][nN][gG]
+
+# Local databases, journals and runtime logs
+*.db
+*.db-*
+*.sqlite*
+logs/
+*.log
