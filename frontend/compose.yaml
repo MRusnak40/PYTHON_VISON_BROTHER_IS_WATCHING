@@ -1,0 +1,15 @@
+name: vision-frontend
+
+services:
+  frontend:
+    build: .
+    ports:
+      - "127.0.0.1:5173:5173"
+    environment:
+      API_PROXY_TARGET: http://host.docker.internal:8000
+      VITE_USE_POLLING: "true"
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./index.html:/app/index.html
+      - ./vite.config.js:/app/vite.config.js

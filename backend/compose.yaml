@@ -1,14 +1,14 @@
-name: vision-detector
+name: vision-backend
 
 services:
   backend:
-    build: ./backend
+    build: .
     ports:
       - "127.0.0.1:8000:8000"
     environment:
       WATCHFILES_FORCE_POLLING: "true"
     volumes:
-      - ./backend/app:/app/app
+      - ./app:/app/app
     command: ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
@@ -16,16 +16,3 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "127.0.0.1:5173:5173"
-    environment:
-      API_PROXY_TARGET: http://backend:8000
-      VITE_USE_POLLING: "true"
-    volumes:
-      - ./frontend/src:/app/src
-      - ./frontend/public:/app/public
-      - ./frontend/index.html:/app/index.html
-      - ./frontend/vite.config.js:/app/vite.config.js

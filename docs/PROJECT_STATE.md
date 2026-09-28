@@ -69,8 +69,12 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
   přesun na kratší cestu je možnost, nikoli dokončená změna.
 
 ## Aktuální Docker konfigurace
-- Existují compose.yaml a Dockerfile/.dockerignore pro backend a frontend.
-- Běžný Compose start spouští backend a frontend.
+- Backend a frontend mají každý vlastní compose.yaml, Dockerfile a .dockerignore.
+- Kořenový Compose byl nahrazen dvěma nezávislými projekty vision-backend
+  a vision-frontend. Každý se spouští přes `docker compose up` ve své složce.
+- Frontend při lokálním vývoji na Docker Desktop předává API požadavky přes
+  host.docker.internal:8000 na publikovaný port backendu. Pro VPS bude síť
+  nastavena zvlášť. UI lze spustit samostatně, API vyžaduje běžící backend.
 - Backend: port localhost:8000, reload, připojený backend/app a healthcheck.
 - Frontend: port localhost:5173, Vite dev server a připojené zdrojové soubory.
 - PostgreSQL v Compose zatím není.
@@ -80,9 +84,21 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Současná konfigurace je vývojová, nikoli produkční.
 
 ## Dosavadní ověření
-- Syntaxe compose.yaml byla ověřena YAML parserem.
+- Dne 2026-09-28 byly zkontrolovány lokální Python 3.12.3 virtualenv:
+  backend má 27 balíčků dle requirements, EDGE 63; verze odpovídají příslušným
+  requirements.txt, navíc je pouze pip. Obě prostředí prošla `pip check`.
+- Import FastAPI v backendu a OpenCV v EDGE prošel. DeepFace a TensorFlow
+  nejsou nainstalované; úplná vision funkčnost tím nebyla ověřena.
+- Lokální prostředí jsou izolovaná (`include-system-site-packages = false`).
+  Jejich prompt je `vision-backend` a `vision-edge`; cesty `.venv` zůstaly stejné.
+  Aktivace v PowerShellu a výběr správného pip byly ověřeny.
+- Syntaxe obou samostatných compose.yaml byla ověřena YAML parserem.
 - Lint frontendu prošel.
 - Docker při přípravě nebyl dostupný v terminálu.
+- Při kontrole 2026-09-28 nebyl příkaz Docker dostupný ani Docker Desktop
+  ve standardním umístění. Konfigurace pro samostatné spuštění frontendu
+  již existuje; README popisuje `docker compose up` v jednotlivých složkách
+  a vysvětlení image, kontejneru, připojených souborů, sítě a proměnných.
 - Docker build, Compose validace a běh kontejnerů nebyly ověřené.
 - Dostupnost a kompatibilita připnutých Python balíčků pro Linux
   nebyly ověřené.
