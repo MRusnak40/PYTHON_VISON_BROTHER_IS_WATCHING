@@ -12,6 +12,8 @@
 - Implementuj postupně a pouze v rozsahu konkrétního zadání.
 - Zachovávej fungující kód; preferuj malé, čitelné změny.
 - Nevytvářej celý cílový systém najednou.
+- Před implementací vysvětli nejmenší potřebnou změnu. Budoucí analytika
+  nesmí zdržovat funkční jádro; nepřidávej struktury jen pro hypotetické funkce.
 - Vysvětluj důležitá rozhodnutí a nové závislosti.
 - Nepřidávej zbytečné abstrakce, služby ani infrastrukturu.
 - Ověřuj změny přiměřeně jejich dopadu. Uváděj, co nebylo ověřeno.
@@ -26,6 +28,13 @@
 - PostgreSQL je centrální zdroj pravdy; lokální edge úložiště slouží
   pro cache, lokální stav a neodeslané události.
 - Stejná edge aplikace má podporovat více zařízení s vlastní identitou.
+- Jedno EDGE může obsluhovat více kamer. Identita osoby je globální,
+  nikoli trvale vázaná na konkrétní EDGE.
+- EDGE běží nativně s vlastními Python závislostmi; backend, frontend
+  a centrální databáze používají Docker. Docker pro EDGE přidávej jen
+  na výslovné zadání.
+- EDGE vytváří pozorování a provádí lokální matching; backend sjednocuje
+  pozorování a provádí globální analytiku. Cíle jsou spravované centrálně.
 
 ## Principy vision a synchronizace
 - MP4, USB a RTSP mají používat společnou vision pipeline.
@@ -39,6 +48,20 @@
 - Nepřenášej trvale plné kamerové streamy přes VPS bez konkrétní potřeby.
 - Vzdálené příkazy musí být předem definované operace, nikoli libovolný shell.
 
+## Význam pozorování a metadat
+- U pozorování zachovej možnost určit kameru, zdrojové zařízení a časový
+  interval; konkrétní schéma rozšiřuj jen podle aktuálního zadání.
+- Název a lokace kamery musí být upravitelné. AI návrh není ověřený fakt;
+  nesmí bez souhlasu přepisovat uživatelem potvrzené údaje.
+- Délka pozorování není jistá délka pobytu v místnosti. Ztráta tracku
+  neprokazuje odchod a sled kamer neprokazuje úplnou fyzickou trasu.
+- Skóre společného výskytu musí mít popsaný význam a výpočet;
+  není pravděpodobností skutečného vztahu mezi lidmi.
+- Oblečení a vzhled těla jsou podpůrné údaje, nikoli definitivní identita;
+  nesmí automaticky přebít spolehlivou identifikaci obličeje.
+- Viditelný výraz nepopisuj jako vnitřní psychický stav. Fyzické odhady
+  neprezentuj jako měření bez odpovídající kalibrace a ověření.
+
 ## Data a soukromí
 - Testuj s oprávněnými účastníky.
 - Tajemství, biometrické snímky, embeddingy a testovací záznamy
@@ -51,13 +74,3 @@
   síť, proměnné prostředí a rozdíl mezi image a kontejnerem.
 - Nepřidávej Redis, message broker, Kubernetes, Traefik ani monitoring,
   pokud je nevyžaduje konkrétní zadání.
-## Volitelné budoucí funkce
-- Pokud bude dokončené MVP a zbyde čas, systém může obsahovat analýzu
-  společných výskytů osob.
-- Lze počítat počet společných výskytů, společný čas, poslední společný
-  výskyt, různé kamery/lokace a vlastní co-occurrence score.
-- Lze vytvořit graf vazeb mezi profily založený na těchto měřených datech.
-- Taková metrika označuje pouze pozorovanou četnost společného výskytu;
-  sama o sobě nesmí být prezentována jako důkaz přátelství, rodinného,
-  partnerského, pracovního nebo jiného skutečného vztahu.
-- Tato funkce je P2/bonus a nesmí blokovat dokončení základního systému.
