@@ -63,10 +63,16 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Existují složky cameras, config, demo, output, storage, tests a vision.
 - Existuje requirements.txt a lokální virtuální prostředí.
 - Neexistuje spustitelná vision aplikace.
-- requirements.txt obsahuje OpenCV, ale ne DeepFace ani TensorFlow.
-- Funkční instalace DeepFace ani rozpoznávání nebyly potvrzené.
-- Dříve se objevil problém s dlouhou Windows cestou pod OneDrive;
-  přesun na kratší cestu je možnost, nikoli dokončená změna.
+- requirements.txt obsahuje OpenCV, DeepFace 0.0.101, TensorFlow 2.21.0,
+  tf-keras 2.21.0 a retina-face 0.0.18.
+- Projekt je přesunutý do `C:\Users\matya\Desktop\PYTHON_VISION_DETECTOR`.
+  Aktivační skripty, konfigurace a konzolové spouštěče obou virtualenv byly
+  obnovené pro novou cestu. Neúplná instalace TensorFlow byla doplněná.
+- Import DeepFace, OpenCV, TensorFlow a tf-keras prošel s `-X utf8`.
+  Jednoduchý výpočet TensorFlow prošel; skutečné rozpoznávání a modelové
+  váhy zatím nejsou ověřené. Demo visionDemo_V000.py je stále prázdné.
+- DeepFace při výpisu Unicode zprávy do CP1250 selhával; README popisuje
+  spuštění s UTF-8 bez změny globálního nastavení Windows.
 
 ## Aktuální Docker konfigurace
 - Backend a frontend mají každý vlastní compose.yaml, Dockerfile a .dockerignore.
@@ -84,6 +90,67 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Současná konfigurace je vývojová, nikoli produkční.
 
 ## Dosavadní ověření
+- Po restartu byl skutečně ověřen Docker Engine 29.8.1 (Linux/amd64).
+  Oba projekty úspěšně prošly `docker compose up --build -d --wait`.
+  Backend `/health` vrátil status ok, frontend `/` HTTP 200 a frontendová
+  proxy `/api/health` status ok. Opraven problém s HTTPS certifikáty při
+  stahování závislostí: Dockerfile podporují volitelný build secret local_ca.
+  Místní ignorované compose.override.yaml předávají veřejné kořenové
+  certifikáty Windows z .docker/local-ca.pem; HTTPS ověřování zůstalo zapnuté.
+  Certifikáty jsou připojené jen při instalaci pip/npm, nekopírují se do image.
+  Po testu oba `docker compose down` odstranily kontejnery a sítě.
+  Docker Desktop byl ukončený, jeho procesy nebyly nalezené a služba
+  com.docker.service byla Stopped. Neběžela žádná WSL distribuce ani
+  posluchač na portech 8000/5173. Image a build cache zůstaly na disku.
+  Starší záznamy níže popisují průběh instalace a již vyřešené blokace.
+- Docker runtime: Docker Desktop se úspěšně nainstaloval, Docker CLI je
+  verze 29.8.1. Obě konfigurace prošly skutečným `docker compose config --quiet`.
+  Engine zatím vracel HTTP 500; build ani kontejnery se nespustily.
+  WSL 2.7.13 bylo následně úspěšně doinstalované jako správce.
+  Virtual Machine Platform byla povolená přes DISM s výsledkem 3010
+  (úspěch, nutný restart Windows). VirtualizationFirmwareEnabled=True.
+  Po restartu je nutné spustit Docker Desktop, ověřit engine a dokončit
+  `docker compose up --build -d` v backend/ a frontend/, včetně HTTP testů.
+  Restart počítače nebyl automaticky provedený. Starší kontroly níže
+  zachycují stav před instalací Dockeru a WSL.
+- Kontrola Docker souborů 2026-09-30: Dockerfile, .dockerignore, Compose,
+  build kontexty, COPY zdroje a bind-mount cesty byly staticky zkontrolované;
+  nebyla nalezena chyba vyžadující změnu konfigurace. Node 22 splňuje
+  deklarované požadavky Vite a pluginu React; npm lock neobsahuje file odkazy.
+  Pip dry-run s Linux manylinux x86-64 / CPython 3.12 wheel tagy úspěšně
+  vyřešil všechny připnuté backendové závislosti. Nejde o běh na Linuxu
+  ani o Docker build; platformní podmínky se při této kontrole mohou lišit.
+  Docker CLI není na PATH, Docker Desktop není v kontrolovaných běžných
+  instalačních umístěních a WSL hlásí, že není nainstalovaný.
+  `docker compose config`, build ani běh kontejnerů proto nebylo možné ověřit.
+- Rozšířená kontrola přesunu 2026-09-30 odhalila ještě starou cestu ve dvou
+  `pip3.12.exe`; oba spouštěče byly obnovené a jejich běh ověřený.
+  Aktivace EDGE i backendu v PowerShellu vybírá správný Python a příkazy.
+  V kontrolovaných souborech projektu a závislostí (s výjimkou Git internals,
+  Python bytecode, médií a velkých binárních souborů) nebyly nalezené další
+  odkazy na původní umístění. V projektu nejsou symlinky ani junctions.
+  Git fsck nehlásí poškození; hlásí pouze nenavázané tree objekty.
+  `npm ls --depth=0` prošlo. Lokální frontend a jeho proxy `/api/health`
+  byly ověřené přes HTTP se spuštěným backendem; testovací procesy ukončené.
+  YAML Compose a existence lokálních build/bind-mount cest byly ověřené.
+  Projekt nemá `.vscode` ani `.idea`; výběr interpreteru uložený mimo projekt
+  v IDE a již otevřené uživatelské terminály nebyly ověřené.
+  Bez kopie před přesunem nelze porovnat úplnost ignorovaných dat a médií.
+- Po přesunu a opravě 2026-09-30 prošel `pip check` pro EDGE i backend,
+  importy DeepFace / OpenCV / TensorFlow / tf-keras a součet tensoru.
+  Frontend prošel `npm run lint` a `npm run build`.
+  Spouštěče pip.exe obou prostředí a backendový uvicorn.exe prošly kontrolou
+  verze. Backend byl dočasně spuštěný na localhostu: HTTP `/`, `/health`,
+  `/docs` a `/openapi.json` prošly; testovací server byl ukončený.
+  Docker není dostupný v terminálu; kontejnery nebyly spuštěné.
+  Níže uvedená první kontrola zachycuje stav před opravou.
+- Dne 2026-09-30 prošel v `edge/.venv` import OpenCV (5.0.0) a `pip check`.
+  Úspěch `pip check` nepotvrzuje úplnost TensorFlow: pip jej neeviduje,
+  přestože jeho neúplná složka existuje. DeepFace není dostupný ani pro import.
+  Windows mají `LongPathsEnabled=0`; souvislost s dřívějším selháním instalace
+  je možná, ale bez původního chybového výpisu nepotvrzená.
+  Soubor `edge/demo/demo_v000/visionDemo_V000.py` je prázdný.
+  Při této kontrole nebyly balíčky ani nastavení Windows měněné.
 - Dne 2026-09-28 byly zkontrolovány lokální Python 3.12.3 virtualenv:
   backend má 27 balíčků dle requirements, EDGE 63; verze odpovídají příslušným
   requirements.txt, navíc je pouze pip. Obě prostředí prošla `pip check`.
@@ -99,7 +166,8 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
   ve standardním umístění. Konfigurace pro samostatné spuštění frontendu
   již existuje; README popisuje `docker compose up` v jednotlivých složkách
   a vysvětlení image, kontejneru, připojených souborů, sítě a proměnných.
-- Docker build, Compose validace a běh kontejnerů nebyly ověřené.
+- Původně neověřený Docker build, Compose a běh kontejnerů byly následně
+  ověřené; aktuální výsledky jsou na začátku této sekce.
 - Dostupnost a kompatibilita připnutých Python balíčků pro Linux
   nebyly ověřené.
 - Git je inicializovaný; při kontrole před prvním commitem index neobsahoval soubory.

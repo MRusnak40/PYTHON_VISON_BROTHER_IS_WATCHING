@@ -61,3 +61,7 @@ urllib3==2.8.0
 Werkzeug==3.1.8
 wheel==0.48.0
 wrapt==2.4.1
+deepface==0.0.101
+tensorflow==2.21.0
+tf-keras==2.21.0
+retina-face==0.0.18

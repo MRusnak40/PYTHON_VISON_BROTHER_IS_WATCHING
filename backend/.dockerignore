@@ -6,3 +6,7 @@ __pycache__/
 .env.*
 .git/
 .pytest_cache/
+
+# Local build certificate configuration
+compose.override.yaml
+*.pem

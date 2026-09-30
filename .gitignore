@@ -59,3 +59,7 @@ Thumbs.db
 *.sqlite*
 logs/
 *.log
+
+# Machine-local Docker trust overrides
+/backend/compose.override.yaml
+/frontend/compose.override.yaml

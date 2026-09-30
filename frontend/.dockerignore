@@ -4,3 +4,7 @@ dist/
 .env.*
 .git/
 *.log
+
+# Local build certificate configuration
+compose.override.yaml
+*.pem

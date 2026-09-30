@@ -2,7 +2,9 @@ FROM node:22-bookworm-slim
 
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN --mount=type=secret,id=local_ca \
+    if [ -f /run/secrets/local_ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/local_ca; fi; \
+    npm ci
 COPY . .
 
 EXPOSE 5173
