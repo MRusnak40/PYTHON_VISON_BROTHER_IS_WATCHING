@@ -60,6 +60,39 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Docker konfigurace zapíná polling pro sledování změn souborů.
 
 ### EDGE
+- Opakovaná kontrola 2026-10-08: žádné chybějící balíčky, odlišné verze ani
+  chybějící soubory proti `edge/requirements.txt` a instalačním RECORD.
+  Zkontrolováno 21 922 hashů; odlišnosti se týkají konzolových spouštěčů
+  a sdílených doprovodných README/requirements/package_info, ne vlastních
+  souborů knihoven. ZIP integrita a interpreterové cesty spouštěčů prošly.
+  `pip check`, importy OpenCV, NumPy, TensorFlow, tf-keras, h5py, DeepFace,
+  RetinaFace, MTCNN a dotenv i výpočet TensorFlow prošly; bez reinstalace.
+  Váhy Facenet512 se nyní úspěšně stáhly přes PowerShell s ověřováním HTTPS
+  do `edge/.venv/.deepface/weights/facenet512_weights.h5` (94 955 648 bajtů).
+  Prošlo otevření HDF5, načtení modelu a inference syntetického obrázku
+  (512 konečných hodnot). Rozpoznávání skutečných osob tím není ověřené.
+  Při použití této cache je nutné před importem DeepFace nastavit
+  `DEEPFACE_HOME` na cestu `edge/.venv` (v EDGE Pythonu `sys.prefix`).
+  Nastavení bylo jen v kontrolním procesu; uživatelovy skripty se neměnily.
+  Níže je zachovaný předchozí neúspěšný pokus o stažení.
+- Kontrola společného `edge/.venv` dne 2026-10-08: všechny verze balíčků
+  odpovídají `edge/requirements.txt`, `pip check` prošel, importy OpenCV,
+  TensorFlow, tf-keras a DeepFace i jednoduchý výpočet TensorFlow prošly.
+  Balíčky nebylo potřeba přeinstalovat. Chybějí váhy Facenet512; pokus stáhnout
+  je do `edge/.venv/.deepface/weights` selhal na ověření HTTPS certifikátu.
+  Následné stažení přes PowerShell mimo sandbox nebylo uživatelem povolené.
+  Model proto zatím nebyl načtený ani otestovaný. `DEEPFACE_HOME` bylo při
+  kontrole nastavené jen pro daný proces; trvalé umístění cache se neměnilo.
+- Dne 2026-10-08 byla na zadání uživatele odstraněna automaticky vytvořená
+  implementace demo_v001 včetně testů, návodu a cache modelů. Uživatel chce
+  Python psát sám a dostávat vysvětlení a kód pouze v chatu po malých krocích.
+  `edge/demo/demo_v001` obsahuje prázdný `visionDemo_V001.py`,
+  `profiles.json` s prázdným seznamem profilů, prázdné zástupné soubory
+  `video.mp4` a `target.jpg` a složku `faces/`. Média musí uživatel nahradit.
+  Plán: více osob ve videu, 2–5 vhodných výřezů na profil, relativní cesty
+  k výřezům v jednom JSON a volitelné hledání cíle. Zatím neimplementováno.
+  Všechny demo vstupy a výstupy zůstávají v demo_v001; ostatní EDGE složky
+  jsou pro finální projekt. Konfigurace spuštění `EDGE: demo v001` zůstává.
 - Existují složky cameras, config, demo, output, storage, tests a vision.
 - Existuje requirements.txt a lokální virtuální prostředí.
 - Neexistuje spustitelná vision aplikace.
@@ -70,7 +103,23 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
   obnovené pro novou cestu. Neúplná instalace TensorFlow byla doplněná.
 - Import DeepFace, OpenCV, TensorFlow a tf-keras prošel s `-X utf8`.
   Jednoduchý výpočet TensorFlow prošel; skutečné rozpoznávání a modelové
-  váhy zatím nejsou ověřené. Demo visionDemo_V000.py je stále prázdné.
+  váhy zatím nejsou ověřené.
+- Dne 2026-10-01 byl do `edge/demo/demo_v000/visionDemo_V000.py` přidaný
+  minimální RTSP test: URL z `CAMERA_RTSP_URL`, náhled OpenCV, hlášené
+  rozlišení/FPS a ukončení klávesou Q. Bez vision pipeline a nových závislostí.
+  Nativní diagnostika OpenCV/FFmpeg je vypnutá kvůli údajům v URL.
+  Demo zůstává lokální a ignorované Gitem. Fyzické připojení Tapo C220
+  zatím není ověřené; při přípravě nebyla proměnná s URL dostupná.
+  V `edge/.venv` prošla kontrola syntaxe, import skriptu s OpenCV 5.0.0
+  a kontrola srozumitelné chyby při chybějící proměnné.
+  Pro spuštění tlačítkem v IDE demo načítá také lokální `.env` vedle skriptu
+  pomocí již dostupného python-dotenv; proměnná prostředí má přednost.
+  Cesta k `.env` nezávisí na pracovní složce. Přihlašovací údaje jsou mimo
+  Python kód a `.env` je ignorovaný Gitem. Načtení konfigurace a importy
+  byly ověřené bez připojení ke kameře.
+- VS Code má výchozí interpreter `edge/.venv` a Windows spouštěcí konfiguraci
+  `EDGE: kamera` s explicitním EDGE Pythonem pro F5 / Ctrl+F5. Již uložený
+  výběr interpreteru ani aktivace v otevřeném terminálu se tím nemění.
 - DeepFace při výpisu Unicode zprávy do CP1250 selhával; README popisuje
   spuštění s UTF-8 bez změny globálního nastavení Windows.
 
