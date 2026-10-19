@@ -65,3 +65,6 @@ deepface==0.0.101
 tensorflow==2.21.0
 tf-keras==2.21.0
 retina-face==0.0.18
+
+# Local Tapo camera controls (privacy and pan/tilt).
+pytapo==3.4.26

@@ -60,6 +60,59 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Docker konfigurace zapíná polling pro sledování změn souborů.
 
 ### EDGE
+- Dne 2026-10-19 bylo na žádost uživatele v existujícím lokálním
+  `edge/demo/test_rtsp_camera.py` nahrazeno automatické otáčení při
+  ukončení ručním ovládáním W/A/S/D během náhledu. W/S ovládá nahoru/dolů,
+  A/D doleva/doprava po 10°; fungují i velká písmena. Aktivní musí být
+  okno OpenCV. Pohybové požadavky mají minimální rozestup 0,3 s;
+  chyba pohybu sama neukončí náhled. Zůstává vypnutí soukromí při startu
+  a zapnutí s ověřením při Q, Esc, zavření okna nebo chybě.
+  Prošly syntaxe, importy a 19 simulovaných kontrol hlavní smyčky
+  (směry, omezení opakování, chyby, úklid a opakované běhy bez pohybu
+  při ukončení). Fyzický pohyb a klávesnice ve skutečném okně nebyly
+  při této úpravě ověřené. Bez nových závislostí a aplikačních souborů.
+  Níže je zachovaná diagnostika před nahrazením automatického pohybu.
+- Kontrola 2026-10-19 kvůli opakovanému otáčení v
+  `edge/demo/test_rtsp_camera.py`: v EDGE prostředí prošly importy OpenCV
+  a pytapo, připojení ovládání Tapo i načtení RTSP snímku 2560 × 1440.
+  `getCruise()` vrátil stav `idle`; soukromý režim byl hlášený jako `on`.
+  Kontrola neposílala pohybové příkazy ani neměnila soukromý režim.
+  Skript při každém ukončení posílá `moveMotor(-180, 0)` a při spuštění
+  nevrací směr zpět. Referenční integrace autora pytapo používá tuto
+  metodu pro relativní posun; opakovaný pohyb doleva proto pravděpodobně
+  dosáhne mechanického dorazu (výrobce pro C220 uvádí rozsah 340°).
+  Dosažení dorazu nebylo fyzicky ověřené; opakované otáčení zůstává
+  neopravené. Testovací skript ani závislosti se při kontrole neměnily.
+- Dne 2026-10-14 byl na výslovnou žádost zjednodušen
+  `edge/demo/test_rtsp_camera.py`: adresu uživatel zadává přímo do `RTSP_URL`
+  nahoře v souboru. Proměnná prostředí ani `.env` se v tomto testu nečtou.
+  Soubor s adresou a přihlašovacími údaji je lokální, ignorovaný Gitem
+  a není sledovaný. Zachovaný náhled, Q, timeouty a úklid zdrojů.
+  Syntaxe, importy a kontrola nevyplněné adresy prošly; simulované ukončení Q
+  a chyby otevření, čtení i OpenCV ověřily úklid a nevypisování tajemství.
+  Dne 2026-10-14 uživatel potvrdil funkční živý RTSP náhled z fyzické
+  Tapo C220 připojené přes hotspot vývojového PC. Tím je uživatelem
+  ověřená konektivita a příjem obrazu. Níže je historie původní verze testu.
+- Dne 2026-10-13 vznikl samostatný test fáze 1
+  `edge/demo/test_rtsp_camera.py`: ručně nastavené `CAMERA_RTSP_URL`
+  pouze z prostředí, OpenCV/FFmpeg náhled, hlášené rozlišení/FPS,
+  ukončení Q a uvolnění zdrojů při chybě či ukončení. Otevření i čtení
+  mají timeout 10 s. Kód nenastavuje síťové adaptéry ani směrování.
+  Závislosti se neměnily; složka demo zůstává ignorovaná Gitem.
+  Prošla kontrola syntaxe/importů v `edge/.venv` (OpenCV 5.0.0, FFmpeg
+  dostupný), skutečné spuštění větve bez URL a sedm simulovaných kontrol:
+  selhání otevření/čtení, prázdný snímek, q/Q, chyba OpenCV a Ctrl+C.
+  U simulací bylo ověřeno uvolnění zdrojů a nevypisování URL aplikací.
+  Při přípravě nebylo v prostředí `CAMERA_RTSP_URL`, fyzické ověření
+  tehdy čekalo na potvrzení uživatele (potvrzeno 2026-10-14 výše). Nejde o implementaci
+  plné podpory kamer ani navazující vision pipeline.
+- Dne 2026-10-13 byly na výslovnou žádost opravené překlepy v uživatelově
+  `edge/demo/demo_v001/main.py`: převod BGR na RGB, název `face_folder`,
+  volání `cv2.imwrite` a název `detected_faces`. Uvolnění videa je chráněné
+  pro případ chyby před jeho otevřením. Skript má hledat obličeje přes MTCNN
+  a skončit po uložení výřezů prvního snímku s detekcemi; nemá ještě výběr
+  kvality, odhad natočení, identifikaci ani zápis profilů. Syntaxe ověřená;
+  celý běh s detektorem a ukládáním nebyl při této opravě spuštěný.
 - Opakovaná kontrola 2026-10-08: žádné chybějící balíčky, odlišné verze ani
   chybějící soubory proti `edge/requirements.txt` a instalačním RECORD.
   Zkontrolováno 21 922 hashů; odlišnosti se týkají konzolových spouštěčů
