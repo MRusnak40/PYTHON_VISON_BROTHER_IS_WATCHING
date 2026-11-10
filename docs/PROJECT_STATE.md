@@ -60,6 +60,26 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Docker konfigurace zapíná polling pro sledování změn souborů.
 
 ### EDGE
+- Úklid adresáře 2026-11-10: do `TRASH/edge-cleanup-2026-11-10/edge/`
+  byly přesunuté `tests/`, historické `demo/`, prázdné nepoužívané `output/`
+  a `edge/TRASH/`. Po upřesnění zadání zůstává vše používané při spuštění
+  `edge/main.py`, včetně cache: čtyři složky `__pycache__/` z kořene EDGE,
+  cameras, config a vision byly obnovené na původní místa (9 souborů,
+  obsah ověřený SHA-256). Testy ani historická dema se neobnovovaly.
+  Archiv nyní obsahuje 14 původních souborů; všech 6 archivovaných Python zdrojů má
+  příponu `.py.disabled`, aby se nespouštěly ani nesbíraly jako testy.
+  `manifest.json` eviduje původní/cílové cesty, velikosti a SHA-256
+  původního přesunu i seznam obnovených cache v sekci `Restoration`;
+  README archivu popisuje obnovu. Celý kořenový `TRASH/` zůstává ignorovaný Gitem.
+  Aktivní zdroje, requirements, konfigurace včetně místního `.env` a
+  `storage/profiles.json` zůstaly obsahově beze změny (13 souborů ověřených hashem).
+  `.venv/` včetně modelů a `profiles/` zůstávají pro běh a ukládání dat.
+  Před přesunem prošlo 51 automatických testů. Po přesunu prošla kontrola
+  syntaxe všech 9 aktivních modulů, obou variant importu bez otevření kamery,
+  úplnosti archivu podle hashů a ignorování archivu i citlivých dat Gitem.
+  Návody odkazují na archiv;
+  starší záznamy níže popisují původní umístění. Kamera ani GUI se při úklidu
+  nespouštěly; úklid nemění vision pipeline ani závislosti.
 - Odpojení ovladače značky 2026-11-10: hlavní aplikace nyní používá pouze
   obecný RTSP zdroj. Importy ovládání, inicializace/úklid ovladače, příkazy
   soukromí a klávesové otáčení jsou z aplikačního kódu odstraněné.

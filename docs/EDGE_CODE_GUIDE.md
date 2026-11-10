@@ -3,7 +3,8 @@
 Tento průvodce popisuje aplikační kód v `edge/` po úpravě 10. 11. 2026.
 Čti nejdřív `edge/main.py`, potom `vision/live.py` a `vision/pipeline.py`.
 Detaily modelů, trackingu a ukládání si otevři až podle konkrétního volání.
-`edge/demo/` obsahuje historické pokusy; hlavní aplikace je nevolá.
+Historické pokusy a testy jsou po úklidu archivované v
+`TRASH/edge-cleanup-2026-11-10/edge/`; hlavní aplikace je nevolá.
 
 ## 1. Co přesně spouštíš
 
@@ -265,7 +266,10 @@ Pro krokování nastav breakpoint do `_preview_loop()` za `source.read()`,
 do `VisionPipeline.process()` a potom do `_resolve()` / `_improve_known()`.
 Debugger ukazuje různé zásobníky pro jednotlivá vlákna; pozastavení ovlivní jejich časování.
 
-Bez připojování skutečné kamery ověříš aplikační logiku stávajícími simulovanými testy:
+Před úklidem 10. 11. 2026 prošlo 51 simulovaných testů bez připojení kamery.
+Testy jsou nyní v `TRASH/edge-cleanup-2026-11-10/edge/tests/` s příponou
+`.py.disabled`. Návod k obnovení je v README stejného archivu.
+Po obnovení do `edge/tests/` je spustíš takto:
 
 ```powershell
 .\edge\.venv\Scripts\python.exe -B -X utf8 -m unittest discover -s edge/tests -q

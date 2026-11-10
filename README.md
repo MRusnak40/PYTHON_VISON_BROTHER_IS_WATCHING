@@ -122,7 +122,8 @@ sdílenou šablonu bez hesel. `.env` se načítá nezávisle na pracovní složc
 Stejný vstup lze spustit pomocí `-m edge.main` nebo otevřením `edge/main.py`
 a VS Code Run s vybraným `edge/.venv/Scripts/python.exe`. F5 / Ctrl+F5 používá
 konfiguraci `EDGE: aplikace`, která také spouští přímo `edge/main.py`.
-Další vývoj probíhá v aplikačních modulech; `edge/demo/` zůstává historickým pokusem.
+Další vývoj probíhá v aplikačních modulech; historická dema jsou archivovaná
+v `TRASH/edge-cleanup-2026-11-10/edge/demo/`.
 Zobrazí se náhled;
 Q, Esc, zavření okna a Ctrl+C ukončí aplikaci. Čtení RTSP má timeout 10 s;
 při odpojení aplikace oznámí chybu, uloží změněné časy a skončí.
@@ -312,8 +313,18 @@ zůstává nepodporovaná.
 
 ### Ověření EDGE
 
+Testy byly při úklidu 2026-11-10 přesunuté do
+`TRASH/edge-cleanup-2026-11-10/edge/tests/`. Před přesunem prošlo všech 51 testů.
+Návod k jejich obnovení je v `TRASH/edge-cleanup-2026-11-10/README.md`.
+Kontrola syntaxe aktivního kódu:
+
 ```powershell
-.\edge\.venv\Scripts\python.exe -X utf8 -m compileall -q edge/main.py edge/cameras edge/config edge/vision edge/tests
+.\edge\.venv\Scripts\python.exe -X utf8 -m compileall -q edge/main.py edge/cameras edge/config edge/vision
+```
+
+Po obnovení testů do původní složky:
+
+```powershell
 .\edge\.venv\Scripts\python.exe -X utf8 -m unittest discover -s edge/tests -v
 ```
 
@@ -373,9 +384,10 @@ python3 -m venv --prompt vision-edge edge/.venv
 edge/.venv/bin/python -m pip install -r edge/requirements.txt
 ```
 
-Testovací videa patří do `edge/recordings`, reference do `edge/targets`,
-výsledky do `edge/output` a lokální stav do `edge/storage`. Jejich obsah je
-ignorovaný Gitem s výjimkou `.gitkeep`.
+Aktuální aplikace ukládá lokální stav do `edge/storage` a fotografie do
+`edge/profiles`. Jejich obsah je ignorovaný Gitem s výjimkou `.gitkeep`.
+Prázdná nepoužívaná složka `edge/output` byla přesunutá do archivu v `TRASH`.
+Složky `edge/recordings` a `edge/targets` nyní aplikace nepoužívá.
 
 `edge/requirements.txt` obsahuje DeepFace, TensorFlow, tf-keras a RetinaFace.
 Na Windows s Pythonem 3.12 prošly importy a jednoduchý výpočet TensorFlow.
@@ -395,8 +407,9 @@ DeepFace může při výpisu zpráv v českém terminálu CP1250 selhat na
 
 Stejný přepínač `-X utf8` dej před cestu ke svému Python skriptu.
 Alternativně nastav `$env:PYTHONUTF8 = "1"` v daném terminálu před spuštěním.
-Lokální `edge/demo/demo_v000/visionDemo_V000.py` obsahuje starší samotný RTSP
-náhled; novou profile pipeline spouštěj přes `edge/main.py`.
+Starší RTSP náhled je archivovaný v
+`TRASH/edge-cleanup-2026-11-10/edge/demo/demo_v000/visionDemo_V000.py.disabled`;
+aktuální profile pipeline spouštěj přes `edge/main.py`.
 
 Po přesunu projektu je potřeba obnovit virtuální prostředí; jejich aktivace
 nebo spouštěče mohou obsahovat původní absolutní cestu. V IDE znovu vyber
