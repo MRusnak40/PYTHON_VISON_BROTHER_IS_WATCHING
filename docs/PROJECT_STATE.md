@@ -60,6 +60,166 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
 - Docker konfigurace zapíná polling pro sledování změn souborů.
 
 ### EDGE
+- Odpojení ovladače značky 2026-11-10: hlavní aplikace nyní používá pouze
+  obecný RTSP zdroj. Importy ovládání, inicializace/úklid ovladače, příkazy
+  soukromí a klávesové otáčení jsou z aplikačního kódu odstraněné.
+  `Settings`, načítání konfigurace a `.env.example` už nemají přepínač
+  ovladače ani parametry otáčení; `pytapo` je odstraněné z requirements.
+  Místní `CAMERA_RTSP_URL` v `edge/config/.env` byla zachovaná bajt po bajtu;
+  odstraněné bylo jen nastavení ovladače a související komentáře.
+  Soubory `cameras/control.py`, `cameras/tapo.py`, `tests/test_privacy.py`
+  a `demo/test_rtsp_camera.py` jsou přesunuté do `TRASH/tapo-2026-11-10/`.
+  Archiv obsahuje i původní verze upravených souborů a návod k obnově.
+  Python soubory archivu mají příponu `.py.disabled`, aby se nespouštěly
+  ani nesbíraly jako testy. Celé `TRASH/` je ignorované Gitem.
+  Obecné scénáře startu, chyb a úklidu zůstávají v `tests/test_application.py`;
+  ostatní runtime testy jsou upravené pro samotné RTSP. Prošlo 51 testů
+  i s výslovně zablokovaným importem původní knihovny ovladače.
+  Syntaxe aktivních zdrojů a testů, kontrola chybějících odkazů na ovladač,
+  úplnost archivu a vyloučení `TRASH/` i `.env` z Gitu byly ověřené.
+  Pro jinou RTSP kameru stačí změnit URL a restartovat aplikaci, pokud je
+  její stream dostupný a kodek podporovaný místním OpenCV/FFmpeg.
+  Povolení streamu, soukromí a polohu kamery nyní spravuje uživatel ručně.
+  USB/MP4 adaptéry se nepřidávaly; kompatibilita všech kamer není ověřená.
+  Fyzická kamera, živé GUI a přesnost rozpoznávání při této změně nebyly ověřované.
+
+#### Historie EDGE
+
+Následující záznamy zachovávají dřívější stav a výsledky kontrol. Popisy
+ovládání původní kamery níže již neodpovídají aktuálnímu aplikačnímu kódu.
+
+- Zpřehlednění kódu 2026-11-10: `main.py` nyní obsahuje `EdgeApplication`.
+  Veřejný vstup `main()` i přímé a balíčkové spuštění zůstávají zachované.
+  Příprava modelů, připojení kamery, GUI smyčka, vykreslení, vstup a úklid
+  mají samostatné metody. Při neočekávané chybě otevření RTSP se nově hlásí
+  přímo fáze spojení místo předchozí fáze přípravy ovládání.
+  V `VisionPipeline` je oddělené potvrzování existující/nové osoby a zlepšování
+  známého profilu; `LiveWorker` odděluje čekání na vstup od výpočtů a metrik.
+  Tracker má dílčí metody pro zánik, nejasnosti, přiřazování a chybějící detekce.
+  Úložiště odděluje validaci profilu/vzorku, výběr doplňku, přípravu profilu
+  a zápis JPEG/JSON; kvalita má samostatný odhad pohledu a dHash.
+  `PipelineResult`, `WorkerSnapshot` a `MatchResult` pojmenovávají položky
+  návratových hodnot při zachování původního rozbalování a indexování.
+  V 11 aplikačních Python modulech jsou rozšířené české komentáře proměnných,
+  vstupů/výstupů a viditelné oddíly; důležité smyčky jsou označené A–D.
+  `docs/EDGE_CODE_GUIDE.md` popisuje přesné pořadí startu, tři aplikační vlákna,
+  předávání snímků, rozhodování o identitě, ukládání, úklid a složitější proměnné.
+  Bez nových závislostí a bez změn prahů, schématu JSON nebo historických dem.
+  Ověření: 62 testů prošlo (původních 59 a 3 nové pro náhled a fázi chyby RTSP);
+  existující test navíc ověřuje dokončení inference před závěrečným flush.
+  Syntaxe aplikačních modulů a testů i kontrola whitespace prošly.
+  Fyzická kamera, ovládání Tapo, skutečné GUI, přesnost rozpoznávání a živé FPS
+  při této úpravě nebyly ověřované; aplikace nebyla připojena ke skutečné kameře.
+- Změna živého lifecycle 2026-10-19: `vision/pipeline.py` nyní používá
+  dočasný prostorový IoU tracker z `vision/tracking.py`. Neznámý track
+  čeká na 2 jasné shody se stejným profilem nebo 3 kvalitní konzistentní
+  embeddingy bez shody před založením. Naváže se `track_id → person_id`;
+  další úhly stejného tracku aktualizují přímo tento profil bez hledání
+  galerie a bez možnosti založit další osobu. Nekvalitní/nekonzistentní
+  důkazy a nejasné shody založení odkládají. Práh cosine distance zůstává
+  0,30; více vzorků každého profilu se dále účastní matchingu.
+  Track zaniká po 1,5 s od první chybějící detekce; nejasný prostorový
+  překryv ruší vazby. Tracker ID se nepersistuje. Stávající duplicity se
+  automaticky neslučují. Křížení/zakrytí a záměna při obsazení stejného
+  místa jinou osobou zůstávají omezením jednoduchého trackeru.
+  Detekce má pauzu 0,25 s, embedding neznámého tracku nejméně 0,4 s,
+  kvalita známého tracku 0,75 s; diskový rozestup fotek zůstává 2 s.
+  Známý track tvoří embedding pouze po úspěšném předvýběru vzorku.
+  MTCNN používá nejvýše šířku 960 px, ale výřezy a JPEG zůstávají z originálu.
+  `vision/live.py` odděluje inference od GUI; má jen jeden přepisovaný
+  čekající snímek, stejně jako RTSP čtečka. Žádná rostoucí fronta.
+  Při ukončení se čeká na právě běžící výpočet před posledním zápisem JSON.
+  Terminál měří hlášené FPS kamery, náhled/zpracování za sekundu, počet
+  embeddingů a matchingů, časy výpočtů a přeskočené čekající snímky.
+  `main.py` nyní používá obecné volitelné ovládání `cameras/control.py`;
+  pytapo se načte pouze při výslovném `CAMERA_TAPO_PRIVACY=1`. Obecný výchozí
+  stav i šablona mají 0, místní Tapo nastavení zůstalo 1. Adaptér zachovává
+  soukromí a WASD, bez změn historického dema. Samotná pipeline přijímá
+  libovolné BGR snímky a nezávisí na výrobci ani zdroji. USB/MP4 adaptéry
+  se zatím nepřidávaly. Profily zůstávají omezené na hlavní 3 + nejvýše 2
+  doplňkové vzorky. Při chybějících JPEG se zachovají použitelné embeddingy
+  a identita; fotky se mohou obnovovat při dalším pozorování.
+  Prošlo 59 testů, syntaxe, import bez pytapo a skutečný MTCNN/Facenet512
+  s uložením syntetického výřezu do dočasného profilu. V kontrolovaném
+  testu 100 nezměněných pozorování klesly embeddingy 100→3 a matchingy 100→4.
+  MTCNN na černém obrazu (2 běhy po zahřátí): 2560×1440 průměr 730 ms,
+  šířka 960 px 127 ms. Nejde o živé FPS ani přesnost. Nová pipeline,
+  tracking napříč úhly a latence s fyzickou kamerou dosud NEOVĚŘENÉ.
+- Diagnostika uživatelského běhu 2026-10-19: log potvrzuje načtení modelů,
+  vypnutí soukromí, start hlavní smyčky a opětovné zapnutí soukromí po chybě.
+  Původní obecná hláška neobsahovala skutečnou výjimku, takže samotný log
+  neurčuje její přesné místo. Následně se bez kamery podařilo reprodukovat
+  chybu prvního zápisu profilu: MTCNN vrací confidence jako NumPy float32/64,
+  výpočet kvality jej propagoval do metadat a JSON selhal na TypeError
+  (float32 nebo NumPy bool). `vision/quality.py` nyní převádí confidence na
+  Python float před výpočtem; `vision/faces.py` převádí souřadnice na int.
+  `main.py` při neočekávané chybě nově vypisuje fázi, typ výjimky a poslední
+  aplikační soubor/řádek, bez textu výjimky nebo tajemství.
+  Prošlo 40 automatických testů a syntaxe. Navíc prošel skutečný Facenet512
+  embedding syntetického výřezu → JSON → opětovné načtení profilu s oběma
+  typy confidence z formatteru instalovaného MTCNN (detekce byla simulovaná).
+  Opravený běh na fyzické kameře zatím nebyl znovu ověřený.
+- Doplnění 2026-10-19: `edge/main.py` nyní po načtení modelů automaticky
+  vypne soukromí Tapo před RTSP a ověří `off`; při řádném ukončení, Ctrl+C
+  nebo ošetřené chybě jej zapne a ověří `on`. Řídí to `cameras/tapo.py`
+  přes stávající pytapo a účet z lokálního RTSP URL. Zapnutí soukromí má
+  při úklidu přednost před uzavřením RTSP a zápisem posledních časů.
+  Selhání autentizace neposílá příkazy; po zahájeném pokusu vypnout soukromí
+  se obnovení zkusí i při následné chybě RTSP nebo nepotvrzeném vypnutí.
+  Nepotvrzené zapnutí vypíše varování a vrátí chybový kód. Násilné ukončení
+  procesu/výpadek napájení úklid neprovede. `CAMERA_TAPO_PRIVACY=1` v
+  `config/.env` je výchozí nastavení, `0` ponechá pouze obecné RTSP.
+  Prošlo 38 automatických testů, syntaxe a import pytapo/aplikace.
+  Přepínání soukromí z tohoto nového main nebylo fyzicky ověřené.
+- Upřesnění 2026-10-19: vstupem celé aplikace zůstává `edge/main.py`;
+  VS Code F5 / Ctrl+F5 nyní používá `EDGE: aplikace` s tímto souborem.
+  Další implementace patří do aplikačních modulů, `edge/demo/` slouží pouze
+  jako historický pokus. Konfigurace včetně místního `.env` a sanitizované
+  `.env.example` je sjednocená v `edge/config/`. Existující místní kamerové
+  údaje byly zachované v ignorovaném `edge/config/.env`.
+  Výběr nyní chrání tři hlavní pohledy `left`, `front`, `right` a dovoluje
+  nejvýše dva odlišné doplňky. Vzorky mají v JSON atribut `role` a jméno
+  souboru zahrnuje zachycený pohled. Tři hlavní fotky stačí; dva doplňky
+  nejsou povinné a neblokují doplnění dosud chybějících stran.
+  Chybějící pohled má přednost před doplňkem i s nižším skóre, pokud je
+  použitelný. Zlepšování obsazeného pohledu nadále vyžaduje rozdíl ≥ 0,05.
+  Starším vzorkům se role odvodí bez smazání při načtení. Složky nových osob
+  dál vznikají automaticky při prvním uložení vzorku. Pohledy jsou pouze
+  heuristika landmarků ve směru obrazu; chybějící strana se nevyrábí,
+  úplný boční profil nemusí detektor zachytit. Fyzicky neověřeno.
+  Prošlo 23 automatických kontrol včetně tří hlavních pohledů, rezervace
+  míst, dvou doplňků, starších profilů a načítání konfigurace. Syntaxe prošla.
+- Dne 2026-10-19 byla implementována skutečná aplikace `edge/main.py`:
+  RTSP → MTCNN → hodnocení výřezu → Facenet512 → lokální matching → JSON/profily.
+  Při kontrole byly připravené aplikační moduly a `storage/profiles.json`
+  prázdné; existující video demo obsahovalo pouze MTCNN a ukládání výřezů,
+  nikoli matching, tracking nebo kvalitu. Nové jádro navazuje na tento postup.
+  `cameras/source.py` přebírá OpenCV/FFmpeg RTSP postup a timeouty z náhledu;
+  jedno čtecí vlákno drží jen nejnovější snímek během výpočtu vision.
+  Tapo/PTZ demo zůstalo beze změny. Aplikace neovládá pohyb kamery;
+  automatické soukromí bylo následně doplněno, viz aktuální záznam výše.
+  Konfigurace URL: proměnná `CAMERA_RTSP_URL` nebo ignorovaný `edge/config/.env`.
+  JSON používá relativní cesty, UTC first_seen/last_seen, model a embeddingy
+  jednotlivých vzorků. Chybějící/prázdný JSON znamená prázdné úložiště;
+  neplatný JSON aplikaci zastaví bez přepsání dat. Existující adresáře ID
+  jsou rezervované. Lokální store je určený pro jeden proces aplikace.
+  Výběr uchovává nejvýše 5 vzorků; podobné výřezy omezuje dHash a orientační
+  poloha nosu vůči očím. Další zápis vzorku nejdříve po 2 s, náhrada při
+  zlepšení skóre alespoň o 0,05. Reprezentativní obrázek odkazuje na nejlepší
+  uložený vzorek, nevzniká další kopie. Při jediném vhodném pohledu může zůstat
+  jen 1 vzorek; minimum 2 se nevynucuje duplicitami. last_seen se průběžně
+  ukládá nejvýše po 5 s a při řádném ukončení. Vzorky se ukládají okamžitě.
+  Matching používá cosine distance ≤ 0,30 (výchozí práh instalovaného
+  DeepFace pro Facenet512); při odstupu dvou nejlepších profilů < 0,05
+  pozorování přeskočí. Tracking ani evidence návštěv zatím nevznikly.
+  Prahy kvality/matchingu jsou heuristiky, přesnost ani výkon nejsou změřené;
+  chybné sloučení i rozdělení identity zůstává možné. Odpojení streamu
+  ukončí běh se srozumitelnou chybou; automatický reconnect není implementovaný.
+  Ověřeno: syntaxe, importy, skutečné načtení MTCNN/Facenet512, prázdný snímek
+  a 512prvkový embedding syntetického výřezu, 18 automatických kontrol
+  kvality, persistence, náhrad, restartu, chyb zápisu a simulovaného runtime.
+  Fyzická RTSP pipeline, náhled GUI a rozpoznávání skutečných osob při této
+  implementaci NEBYLY ověřené. Bez nových závislostí. Návod a schéma v README.
 - Dne 2026-10-19 bylo na žádost uživatele v existujícím lokálním
   `edge/demo/test_rtsp_camera.py` nahrazeno automatické otáčení při
   ukončení ručním ovládáním W/A/S/D během náhledu. W/S ovládá nahoru/dolů,
@@ -148,7 +308,7 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
   jsou pro finální projekt. Konfigurace spuštění `EDGE: demo v001` zůstává.
 - Existují složky cameras, config, demo, output, storage, tests a vision.
 - Existuje requirements.txt a lokální virtuální prostředí.
-- Neexistuje spustitelná vision aplikace.
+- Spustitelná lokální vision aplikace nyní existuje; viz záznam 2026-10-19 výše.
 - requirements.txt obsahuje OpenCV, DeepFace 0.0.101, TensorFlow 2.21.0,
   tf-keras 2.21.0 a retina-face 0.0.18.
 - Projekt je přesunutý do `C:\Users\matya\Desktop\PYTHON_VISION_DETECTOR`.
@@ -282,15 +442,13 @@ zdržovat dokončení fungujícího jádra v dostupném časovém rozpočtu.
   při kontrole nebyla nalezena. Existující frontend/.gitignore zůstal zachovaný.
 
 ## Nejbližší funkční milník
-Malé nativní EDGE demo:
-- vstupní historické video a volitelný referenční snímek,
-- detekce a tracking,
-- výběr přibližně 2–5 kvalitních vzorků na osobu,
-- embeddingy a přiřazení nebo vytvoření anonymního profilu,
-- reprezentativní snímky a JSON s časovými offsety,
-- případné upozornění na shodu s referencí.
+Fyzicky ověřit implementovanou lokální RTSP pipeline v `edge/main.py`:
+- vznik profilu, opakované rozpoznání i po restartu,
+- postupné zlepšování vzorků a jejich počet v JSON i na disku,
+- vhodnost prahů kvality/matchingu a odezvu na skutečné kameře.
 
-Jde o plán; implementovat až na konkrétní zadání.
+Jednoduchý IoU tracking je implementovaný, fyzické ověření jeho omezení zůstává
+součástí milníku. MP4/USB adaptéry a případné hledání cíle čekají na další zadání.
 
 ## Priority a pozdější rozsah
 

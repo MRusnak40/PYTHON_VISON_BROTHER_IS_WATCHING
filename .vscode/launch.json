@@ -2,20 +2,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "EDGE: demo v001",
+            "name": "EDGE: aplikace",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/edge/demo/demo_v001/visionDemo_V001.py",
+            "program": "${workspaceFolder}/edge/main.py",
             "python": "${workspaceFolder}/edge/.venv/Scripts/python.exe",
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}"
-        },
-        {
-            "name": "EDGE: kamera",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/edge/demo/demo_v000/visionDemo_V000.py",
-            "python": "${workspaceFolder}/edge/.venv/Scripts/python.exe",
+            "pythonArgs": ["-X", "utf8"],
             "console": "integratedTerminal",
             "cwd": "${workspaceFolder}"
         }

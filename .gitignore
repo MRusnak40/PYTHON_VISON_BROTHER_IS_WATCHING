@@ -1,3 +1,6 @@
+# Local recovery archive; may contain old camera credentials.
+/TRASH/
+
 # Python environments, bytecode and caches
 .venv/
 venv/
@@ -43,6 +46,8 @@ Thumbs.db
 !/edge/output/.gitkeep
 /edge/storage/*
 !/edge/storage/.gitkeep
+/edge/profiles/*
+!/edge/profiles/.gitkeep
 
 # Biometric media anywhere under edge (also match uppercase extensions)
 /edge/**/*.[mM][pP]4
